@@ -19,9 +19,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const user = req.user;
+      if (!user || !user.claims || !user.claims.sub) {
+        return res.status(401).json({ message: "Unauthorized - invalid user session" });
+      }
+      const userId = user.claims.sub;
+      const userData = await storage.getUser(userId);
+      if (!userData) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(userData);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -223,11 +230,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Protected Admin API routes
   const adminAuth = (req: any, res: any, next: any) => {
-    isAuthenticated(req, res, () => {
-      if (req.user?.claims?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
+    isAuthenticated(req, res, async () => {
+      try {
+        const user = req.user;
+        if (!user || !user.claims || !user.claims.sub) {
+          return res.status(401).json({ message: "Unauthorized - invalid user session" });
+        }
+        const userData = await storage.getUser(user.claims.sub);
+        if (!userData || userData.role !== 'admin') {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+        next();
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        return res.status(500).json({ message: "Failed to verify admin status" });
       }
-      next();
     });
   };
 
@@ -299,9 +316,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/blog', adminAuth, async (req, res) => {
     try {
+      const user = req.user;
+      if (!user || !user.claims || !user.claims.sub) {
+        return res.status(401).json({ message: "Unauthorized - invalid user session" });
+      }
       const postData = insertBlogPostSchema.parse({
         ...req.body,
-        authorId: req.user.claims.sub,
+        authorId: user.claims.sub,
       });
       const post = await storage.createBlogPost(postData);
       res.json(post);
