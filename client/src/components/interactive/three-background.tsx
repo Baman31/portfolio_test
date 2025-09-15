@@ -1,5 +1,49 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+
+// Client-side guard hook
+function useIsClient() {
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  return isClient;
+}
+
+// Reduced motion hook
+function useReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+  
+  return prefersReducedMotion;
+}
+
+// Device detection
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  
+  return isMobile;
+}
 
 interface ThreeBackgroundProps {
   variant?: 'particles' | 'geometric' | 'waves';
@@ -14,7 +58,25 @@ export default function ThreeBackground({
   color = '#3b82f6',
   className = ''
 }: ThreeBackgroundProps) {
+  const isClient = useIsClient();
+  const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
   const mountRef = useRef<HTMLDivElement>(null);
+  
+  // Disable Three.js background for mobile or reduced motion preference
+  if (!isClient || isMobile || prefersReducedMotion) {
+    return (
+      <div 
+        ref={mountRef} 
+        className={`absolute inset-0 pointer-events-none ${className}`}
+        style={{ 
+          zIndex: -1,
+          background: `linear-gradient(135deg, ${color}10 0%, ${color}05 100%)`
+        }}
+        data-testid="three-background-fallback"
+      />
+    );
+  }
   const sceneRef = useRef<{
     scene?: THREE.Scene;
     camera?: THREE.PerspectiveCamera;
@@ -24,6 +86,8 @@ export default function ThreeBackground({
     animationId?: number;
     startTime?: number;
   }>({});
+  const resizeObserverRef = useRef<ResizeObserver>();
+  const isVisibleRef = useRef(true);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -42,7 +106,7 @@ export default function ThreeBackground({
       antialias: true 
     });
     renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // HiDPI support
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Limit DPR for performance
     renderer.setClearColor(0x000000, 0); // Transparent background
     mountRef.current.appendChild(renderer.domElement);
 
@@ -62,9 +126,15 @@ export default function ThreeBackground({
 
     camera.position.z = 5;
 
-    // Animation loop
+    // Animation loop with visibility check
     const animate = () => {
       sceneRef.current.animationId = requestAnimationFrame(animate);
+      
+      // Skip rendering if not visible
+      if (!isVisibleRef.current) {
+        return;
+      }
+      
       const currentTime = Date.now();
       const elapsed = (currentTime - (sceneRef.current.startTime || currentTime)) * 0.001;
       
@@ -98,20 +168,33 @@ export default function ThreeBackground({
 
     animate();
 
-    // Handle resize
+    // Handle resize with ResizeObserver
     const handleResize = () => {
       if (!mountRef.current) return;
       
-      camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+      const rect = mountRef.current.getBoundingClientRect();
+      camera.aspect = rect.width / rect.height;
       camera.updateProjectionMatrix();
-      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+      renderer.setSize(rect.width, rect.height);
     };
 
-    window.addEventListener('resize', handleResize);
+    // Set up ResizeObserver
+    resizeObserverRef.current = new ResizeObserver(handleResize);
+    resizeObserverRef.current.observe(mountRef.current);
+
+    // Visibility handling
+    const handleVisibilityChange = () => {
+      isVisibleRef.current = !document.hidden;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Cleanup
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       
       if (sceneRef.current.animationId) {
         cancelAnimationFrame(sceneRef.current.animationId);
@@ -159,7 +242,8 @@ export default function ThreeBackground({
 }
 
 function createParticleSystem(scene: THREE.Scene, intensity: string, color: string): THREE.Points {
-  const particleCount = intensity === 'low' ? 1000 : intensity === 'medium' ? 2000 : 3000;
+  // Reduce particle count for better performance
+  const particleCount = intensity === 'low' ? 500 : intensity === 'medium' ? 1000 : 1500;
   
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
@@ -198,7 +282,8 @@ function createParticleSystem(scene: THREE.Scene, intensity: string, color: stri
 }
 
 function createGeometricShapes(scene: THREE.Scene, intensity: string, color: string) {
-  const shapeCount = intensity === 'low' ? 5 : intensity === 'medium' ? 10 : 15;
+  // Reduce shape count for better performance
+  const shapeCount = intensity === 'low' ? 3 : intensity === 'medium' ? 6 : 9;
   
   const geometries = [
     new THREE.BoxGeometry(0.5, 0.5, 0.5),
@@ -235,7 +320,8 @@ function createGeometricShapes(scene: THREE.Scene, intensity: string, color: str
 }
 
 function createWaveEffect(scene: THREE.Scene, intensity: string, color: string): THREE.PlaneGeometry {
-  const size = intensity === 'low' ? 32 : intensity === 'medium' ? 64 : 128;
+  // Reduce complexity for better performance
+  const size = intensity === 'low' ? 16 : intensity === 'medium' ? 32 : 48;
   
   const geometry = new THREE.PlaneGeometry(8, 8, size, size);
   const material = new THREE.MeshBasicMaterial({

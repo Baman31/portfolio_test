@@ -1,6 +1,33 @@
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { useSpring, animated, config } from '@react-spring/web';
+
+// Client-side guard hook
+function useIsClient() {
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  return isClient;
+}
+
+// Mobile detection hook
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  
+  return isMobile;
+}
 
 interface ButtonRippleProps {
   children: React.ReactNode;
@@ -15,7 +42,29 @@ export function ButtonRipple({
   onClick,
   variant = 'primary'
 }: ButtonRippleProps) {
+  const isClient = useIsClient();
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  
+  // Simplified version for reduced motion or mobile
+  if (!isClient || shouldReduceMotion || isMobile) {
+    const baseClasses = {
+      primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+      ghost: 'hover:bg-accent hover:text-accent-foreground'
+    };
+    
+    return (
+      <button
+        className={`px-4 py-2 rounded-md transition-colors ${baseClasses[variant]} ${className}`}
+        onClick={onClick}
+        data-testid={`button-simple-${variant}`}
+      >
+        {children}
+      </button>
+    );
+  }
 
   const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
@@ -87,7 +136,19 @@ export function MagneticElement({
   strength = 0.3,
   className = ''
 }: MagneticElementProps) {
+  const isClient = useIsClient();
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  
+  // Disable magnetic effect on mobile or reduced motion
+  if (!isClient || shouldReduceMotion || isMobile) {
+    return (
+      <div className={className} data-testid="magnetic-element-disabled">
+        {children}
+      </div>
+    );
+  }
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const element = event.currentTarget;
@@ -130,7 +191,19 @@ export function TiltCard({
   className = '',
   maxTilt = 15
 }: TiltCardProps) {
+  const isClient = useIsClient();
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  
+  // Disable tilt effect on mobile or reduced motion
+  if (!isClient || shouldReduceMotion || isMobile) {
+    return (
+      <div className={className} data-testid="tilt-card-disabled">
+        {children}
+      </div>
+    );
+  }
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const element = event.currentTarget;
@@ -256,7 +329,19 @@ export function GlowEffect({
   intensity = 0.5,
   className = ''
 }: GlowEffectProps) {
+  const isClient = useIsClient();
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Disable glow effect on mobile or reduced motion
+  if (!isClient || shouldReduceMotion || isMobile) {
+    return (
+      <div className={className} data-testid="glow-effect-disabled">
+        {children}
+      </div>
+    );
+  }
 
   // Convert hex to rgba for glow effect
   const hexToRgba = (hex: string, alpha: number) => {

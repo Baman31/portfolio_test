@@ -1,5 +1,49 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSpring, animated } from '@react-spring/web';
+
+// Client-side guard hook
+function useIsClient() {
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  return isClient;
+}
+
+// Reduced motion hook
+function useReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+  
+  return prefersReducedMotion;
+}
+
+// Device detection hook
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  
+  return isMobile;
+}
 
 interface Particle {
   id: number;
@@ -34,11 +78,29 @@ export default function ParticleSystem({
   size = { min: 2, max: 6 },
   life = { min: 1000, max: 3000 }
 }: ParticleSystemProps) {
+  const isClient = useIsClient();
+  const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  
+  // Adjust settings based on device capabilities
+  const effectiveCount = isMobile ? Math.min(count, 25) : count;
+  const effectiveSpeed = prefersReducedMotion ? 0 : (isMobile ? speed * 0.5 : speed);
+  const shouldDisableEffects = prefersReducedMotion || (!isClient);
+  
+  if (!isClient || shouldDisableEffects) {
+    return (
+      <div className={`relative ${className}`} data-testid="particle-system-disabled">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
+      </div>
+    );
+  }
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animationIdRef = useRef<number>();
   const mouseRef = useRef({ x: 0, y: 0 });
-  const [isActive, setIsActive] = useState(autoStart);
+  const resizeObserverRef = useRef<ResizeObserver>();
+  const isVisibleRef = useRef(true);
+  const [isActive, setIsActive] = useState(autoStart && !shouldDisableEffects);
 
   const springProps = useSpring({
     opacity: isActive ? 1 : 0.5,
@@ -65,16 +127,16 @@ export default function ParticleSystem({
     };
   };
 
-  // Update particle
+  // Update particle with throttled speed
   const updateParticle = (particle: Particle, deltaTime: number): Particle => {
     const canvas = canvasRef.current;
     if (!canvas) return particle;
 
     const newParticle = { ...particle };
     
-    // Update position
-    newParticle.x += newParticle.vx * deltaTime * 0.016;
-    newParticle.y += newParticle.vy * deltaTime * 0.016;
+    // Update position with effective speed
+    newParticle.x += newParticle.vx * deltaTime * 0.016 * effectiveSpeed;
+    newParticle.y += newParticle.vy * deltaTime * 0.016 * effectiveSpeed;
 
     // Update life
     newParticle.life -= deltaTime;
@@ -89,16 +151,17 @@ export default function ParticleSystem({
       newParticle.y = Math.max(0, Math.min(canvas.height, newParticle.y));
     }
 
-    // Interactive mode - attract to mouse
-    if (interactive) {
+    // Interactive mode - attract to mouse (reduced on mobile)
+    if (interactive && (!isMobile || effectiveCount < 20)) {
       const dx = mouseRef.current.x - newParticle.x;
       const dy = mouseRef.current.y - newParticle.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       
-      if (distance < 100 && distance > 0) {
-        const force = (100 - distance) / 100 * 0.5;
-        newParticle.vx += (dx / distance) * force * deltaTime * 0.016;
-        newParticle.vy += (dy / distance) * force * deltaTime * 0.016;
+      const attractionRadius = isMobile ? 60 : 100;
+      if (distance < attractionRadius && distance > 0) {
+        const force = (attractionRadius - distance) / attractionRadius * (isMobile ? 0.25 : 0.5);
+        newParticle.vx += (dx / distance) * force * deltaTime * 0.016 * effectiveSpeed;
+        newParticle.vy += (dy / distance) * force * deltaTime * 0.016 * effectiveSpeed;
       }
     }
 
@@ -127,43 +190,57 @@ export default function ParticleSystem({
     ctx.fill();
   };
 
-  // Animation loop
-  useEffect(() => {
+  // Animation function
+  const startAnimation = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || animationIdRef.current) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let lastTime = 0;
-
-    // Initialize particles
-    particlesRef.current = Array.from({ length: count }, () => createParticle());
+    let lastRenderTime = 0;
+    const targetFPS = isMobile ? 30 : 60;
+    const frameInterval = 1000 / targetFPS;
 
     const animate = (currentTime: number) => {
+      // Stop if not visible or not active
+      if (!isVisibleRef.current || !isActive) {
+        animationIdRef.current = undefined;
+        return;
+      }
+      
       const deltaTime = currentTime - lastTime;
       lastTime = currentTime;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Throttle rendering for performance
+      if (currentTime - lastRenderTime < frameInterval) {
+        animationIdRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastRenderTime = currentTime;
 
-      if (isActive) {
-        // Update and render particles
-        particlesRef.current = particlesRef.current
-          .map(particle => updateParticle(particle, deltaTime))
-          .filter(particle => particle.life > 0);
+      // Clear canvas (use CSS pixel dimensions since context is scaled)
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
 
-        // Add new particles if needed
-        while (particlesRef.current.length < count) {
-          particlesRef.current.push(createParticle());
-        }
+      // Update and render particles
+      particlesRef.current = particlesRef.current
+        .map(particle => updateParticle(particle, deltaTime))
+        .filter(particle => particle.life > 0);
 
-        // Render particles
-        particlesRef.current.forEach(particle => {
-          renderParticle(ctx, particle);
-        });
+      // Add new particles if needed
+      while (particlesRef.current.length < effectiveCount) {
+        particlesRef.current.push(createParticle());
+      }
 
-        // Draw connections between nearby particles
+      // Render particles
+      particlesRef.current.forEach(particle => {
+        renderParticle(ctx, particle);
+      });
+
+      // Draw connections (skip on mobile for performance)
+      if (!isMobile || effectiveCount < 20) {
         drawConnections(ctx, particlesRef.current);
       }
 
@@ -171,13 +248,38 @@ export default function ParticleSystem({
     };
 
     animationIdRef.current = requestAnimationFrame(animate);
+  }, [effectiveCount, isActive, isMobile, effectiveSpeed]);
+
+  // Animation loop initialization
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Initialize particles
+    particlesRef.current = Array.from({ length: effectiveCount }, () => createParticle());
+
+    // Start animation if visible and active
+    if (isVisibleRef.current && isActive) {
+      startAnimation();
+    }
 
     return () => {
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = undefined;
       }
     };
-  }, [count, colors, isActive, interactive, speed, size, life]);
+  }, [effectiveCount, colors, interactive, size, life, startAnimation]);
+
+  // Handle active state changes
+  useEffect(() => {
+    if (isActive && isVisibleRef.current && !animationIdRef.current) {
+      startAnimation();
+    } else if (!isActive && animationIdRef.current) {
+      cancelAnimationFrame(animationIdRef.current);
+      animationIdRef.current = undefined;
+    }
+  }, [isActive, startAnimation]);
 
   // Draw connections between particles
   const drawConnections = (ctx: CanvasRenderingContext2D, particles: Particle[]) => {
@@ -232,26 +334,92 @@ export default function ParticleSystem({
     }
   };
 
-  // Handle resize
+  // Store DPR for consistent use
+  const dprRef = useRef(1);
+  
+  // Handle resize with ResizeObserver
+  const handleResize = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
+    const rect = parent.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Limit DPR for performance
+    dprRef.current = dpr;
+    
+    // Set canvas size with DPR scaling
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    
+    // Scale context for DPR
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+  }, []);
+
+  // Set up ResizeObserver and visibility handling
   useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-      const parent = canvas.parentElement;
-      if (!parent) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
 
-      canvas.width = parent.clientWidth;
-      canvas.height = parent.clientHeight;
+    // Initial resize
+    handleResize();
+
+    // ResizeObserver for efficient resize handling
+    resizeObserverRef.current = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === parent) {
+          handleResize();
+          break;
+        }
+      }
+    });
+    resizeObserverRef.current.observe(parent);
+
+    // Intersection Observer for visibility detection
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisibleRef.current;
+        isVisibleRef.current = entry.isIntersecting && !document.hidden;
+        
+        // Restart animation if becoming visible
+        if (!wasVisible && isVisibleRef.current && isActive && !animationIdRef.current) {
+          startAnimation();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    intersectionObserver.observe(canvas);
+
+    // Visibility change handling for performance
+    const handleVisibilityChange = () => {
+      const wasVisible = isVisibleRef.current;
+      isVisibleRef.current = !document.hidden;
+      
+      // Restart animation if becoming visible
+      if (!wasVisible && isVisibleRef.current && isActive && !animationIdRef.current) {
+        startAnimation();
+      }
     };
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+      intersectionObserver.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [handleResize, isActive]);
 
   return (
     <animated.div 
