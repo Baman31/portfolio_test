@@ -16,7 +16,7 @@ export default function HeroSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
         <div className="max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-card border border-border mb-8 fade-in">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-card border border-border mb-8 fade-in-custom">
             <span className="w-2 h-2 bg-chart-2 rounded-full mr-2"></span>
             <span className="text-sm font-medium text-muted-foreground">Trusted by 500+ companies worldwide</span>
           </div>

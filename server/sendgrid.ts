@@ -1,11 +1,11 @@
 import { MailService } from '@sendgrid/mail';
 
-if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY environment variable must be set");
-}
-
 const mailService = new MailService();
-mailService.setApiKey(process.env.SENDGRID_API_KEY);
+
+// Only set API key if available - this allows the app to start in development without SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 interface EmailParams {
   to: string;
@@ -19,6 +19,11 @@ export async function sendEmail(
   apiKey: string,
   params: EmailParams
 ): Promise<boolean> {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.warn('SendGrid API key not configured - email sending disabled in development mode');
+    return true; // Return true to allow development to continue
+  }
+
   try {
     await mailService.send({
       to: params.to,

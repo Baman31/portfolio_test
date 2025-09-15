@@ -172,12 +172,12 @@
     @apply -translate-y-1 shadow-lg;
   }
 
-  .fade-in {
-    @apply opacity-0 animate-in fade-in duration-600;
+  .fade-in-custom {
+    @apply opacity-0 animate-in fade-in duration-500;
   }
 
   .slide-up {
-    @apply translate-y-5 opacity-0 animate-in slide-in-from-bottom duration-600;
+    @apply translate-y-5 opacity-0 animate-in slide-in-from-bottom duration-500;
   }
 }
 

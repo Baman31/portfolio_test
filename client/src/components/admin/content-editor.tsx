@@ -162,7 +162,7 @@ export default function ContentEditor({
           <div className="mt-2 text-xs text-muted-foreground">
             <p>
               <strong>Formatting tips:</strong> Use **bold**, *italic*, `code`, 
-              > quotes, - lists, [links](url), ![images](url)
+              {'>'} quotes, - lists, [links](url), ![images](url)
             </p>
           </div>
         )}
