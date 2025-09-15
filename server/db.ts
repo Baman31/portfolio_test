@@ -3,7 +3,23 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+// Configure WebSocket with proper certificate handling
+class WebSocketWithCertConfig extends ws {
+  constructor(address: any, protocols?: any, options?: any) {
+    const wsOptions = {
+      ...options,
+      // Environment-specific certificate validation
+      rejectUnauthorized: process.env.NODE_ENV === 'production',
+      // Enable TLS 1.3 for production
+      secureProtocol: process.env.NODE_ENV === 'production' ? 'TLSv1_3_method' : undefined,
+      // Disable certificate validation only in development
+      checkServerIdentity: process.env.NODE_ENV === 'production' ? undefined : () => undefined,
+    };
+    super(address, protocols, wsOptions);
+  }
+}
+
+neonConfig.webSocketConstructor = WebSocketWithCertConfig;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
