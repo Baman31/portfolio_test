@@ -138,19 +138,19 @@ export default function Landing() {
       <HeroSection />
 
       {/* Services Section */}
-      <section id="services" className="py-20 bg-card/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="services" className="py-12 sm:py-16 lg:py-20 bg-card/30">
+        <div className="container mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-6">
+            <h2 className="text-heading-mobile md:text-heading-tablet lg:text-heading-desktop font-serif font-bold text-foreground mb-6">
               Our <span className="gradient-text">Expertise</span> & Services
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground max-w-3xl mx-auto">
               From cloud architecture to AI-powered solutions, we deliver comprehensive software development 
               services that scale with your business growth.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-16 lg:mb-20">
             {services.map((service, index) => (
               <ServiceCard key={index} {...service} />
             ))}
@@ -158,7 +158,7 @@ export default function Landing() {
 
           {/* Technology Stack */}
           <div className="text-center mb-12">
-            <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-4">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-semibold text-foreground mb-4">
               Technologies We Master
             </h3>
             <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -167,7 +167,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4 lg:gap-6">
             {['React', 'Next.js', 'TypeScript', 'Python', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL'].map((tech) => (
               <div key={tech} className="tech-card bg-card p-6 rounded-xl text-center hover:shadow-md">
                 <div className="w-12 h-12 bg-chart-1/20 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -181,18 +181,18 @@ export default function Landing() {
       </section>
 
       {/* Portfolio Section */}
-      <section id="portfolio" className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="portfolio" className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-6">
+            <h2 className="text-heading-mobile md:text-heading-tablet lg:text-heading-desktop font-serif font-bold text-foreground mb-6">
               Featured <span className="gradient-text">Projects</span> & Case Studies
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+            <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground max-w-3xl mx-auto mb-12">
               Discover how we've helped businesses transform their operations with innovative software solutions 
               that deliver measurable results.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-2 mb-12">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-12">
               <Badge variant="default" className="px-6 py-2">All Projects</Badge>
               <Badge variant="secondary" className="px-6 py-2">Web Applications</Badge>
               <Badge variant="secondary" className="px-6 py-2">Mobile Apps</Badge>
@@ -200,7 +200,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 mb-20">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 mb-16 lg:mb-20">
             {featuredProjects?.slice(0, 4).map((project: any) => (
               <ProjectCard key={project.id} project={project} />
             ))}
@@ -221,13 +221,13 @@ export default function Landing() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 bg-card/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="about" className="py-12 sm:py-16 lg:py-20 bg-card/30">
+        <div className="container mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-6">
+            <h2 className="text-heading-mobile md:text-heading-tablet lg:text-heading-desktop font-serif font-bold text-foreground mb-6">
               About <span className="gradient-text">TechForge</span> Solutions
             </h2>
-            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+            <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground max-w-4xl mx-auto leading-relaxed">
               Founded in 2012, we're a global software development company with a mission to help businesses 
               transform their operations through innovative technology solutions. Our team of 150+ experts 
               across 12 countries has delivered 500+ successful projects for clients ranging from startups 
@@ -235,7 +235,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-24">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8 mb-16 lg:mb-24">
             {companyValues.map((value, index) => (
               <div key={index} className="text-center">
                 <div className="w-16 h-16 bg-chart-1/20 rounded-xl flex items-center justify-center mx-auto mb-6 text-chart-1">
@@ -249,7 +249,7 @@ export default function Landing() {
 
           {/* Leadership Team */}
           <div className="text-center mb-16">
-            <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-4">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-semibold text-foreground mb-4">
               Meet Our Leadership Team
             </h3>
             <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -258,7 +258,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16 lg:mb-20">
             {featuredTeam?.map((member: any) => (
               <div key={member.id} className="text-center">
                 <div className="relative mb-6">
@@ -275,7 +275,7 @@ export default function Landing() {
 
           {/* Global Presence */}
           <div className="text-center">
-            <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-8">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-semibold text-foreground mb-8">
               Global Presence
             </h3>
             <StatsGrid stats={[
@@ -289,19 +289,19 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-6">
+            <h2 className="text-heading-mobile md:text-heading-tablet lg:text-heading-desktop font-serif font-bold text-foreground mb-6">
               What Our <span className="gradient-text">Clients</span> Say
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground max-w-3xl mx-auto">
               Don't just take our word for it. Here's what industry leaders and business owners 
               have to say about working with TechForge Solutions.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-16">
             {testimonials.map((testimonial, index) => (
               <TestimonialCard key={index} {...testimonial} />
             ))}
@@ -312,7 +312,7 @@ export default function Landing() {
             <p className="text-muted-foreground mb-8">Trusted by leading companies worldwide</p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center opacity-60">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 lg:gap-8 items-center opacity-60">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex justify-center">
                 <div className="bg-muted w-32 h-16 rounded-lg flex items-center justify-center">
@@ -325,19 +325,19 @@ export default function Landing() {
       </section>
 
       {/* Blog Preview Section */}
-      <section id="blog" className="py-20 bg-card/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="blog" className="py-12 sm:py-16 lg:py-20 bg-card/30">
+        <div className="container mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-6">
+            <h2 className="text-heading-mobile md:text-heading-tablet lg:text-heading-desktop font-serif font-bold text-foreground mb-6">
               Latest <span className="gradient-text">Insights</span> & Articles
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground max-w-3xl mx-auto">
               Stay up-to-date with the latest trends in software development, technology insights, 
               and industry best practices from our team of experts.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
             {[
               {
                 title: "The Future of AI in Software Development: Trends for 2024",
@@ -402,19 +402,19 @@ export default function Landing() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="contact" className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-6">
+            <h2 className="text-heading-mobile md:text-heading-tablet lg:text-heading-desktop font-serif font-bold text-foreground mb-6">
               Ready to <span className="gradient-text">Transform</span> Your Business?
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground max-w-3xl mx-auto">
               Let's discuss your project and see how our expertise can help you achieve your goals. 
               Get in touch with our team for a free consultation.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
             <ContactForm />
             
             {/* Contact Information */}

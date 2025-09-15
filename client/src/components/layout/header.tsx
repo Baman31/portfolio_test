@@ -105,6 +105,7 @@ export default function Header() {
             <Button
               variant="ghost"
               size="sm"
+              className="min-h-touch min-w-touch p-2"
               onClick={toggleMenu}
               data-testid="button-mobile-menu"
             >
@@ -116,16 +117,16 @@ export default function Header() {
         {/* Mobile Navigation Menu */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-card rounded-lg mt-2">
+            <div className="px-4 pt-4 pb-6 space-y-2 bg-card rounded-lg mt-2 shadow-lg border border-border">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 font-medium ${
+                  className={`block px-4 py-3 font-medium min-h-touch rounded-md transition-colors ${
                     location === item.href 
-                      ? 'text-primary' 
-                      : 'text-foreground hover:text-primary'
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-foreground hover:text-primary hover:bg-accent'
                   }`}
                 >
                   {item.name}
@@ -135,20 +136,20 @@ export default function Header() {
                 <Link
                   href="/admin"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 font-medium ${
+                  className={`block px-4 py-3 font-medium min-h-touch rounded-md transition-colors ${
                     location.startsWith('/admin') 
-                      ? 'text-primary' 
-                      : 'text-foreground hover:text-primary'
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-foreground hover:text-primary hover:bg-accent'
                   }`}
                 >
                   Admin
                 </Link>
               )}
-              <div className="pt-4 space-y-2">
+              <div className="pt-4 space-y-3 border-t border-border">
                 {isAuthenticated ? (
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full min-h-touch"
                     onClick={() => {
                       setIsMenuOpen(false);
                       window.location.href = '/api/logout';
@@ -161,7 +162,7 @@ export default function Header() {
                   <>
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full min-h-touch"
                       onClick={() => {
                         setIsMenuOpen(false);
                         window.location.href = '/api/login';
@@ -171,7 +172,7 @@ export default function Header() {
                       Login
                     </Button>
                     <Link href="/contact" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full" data-testid="button-get-started-mobile">
+                      <Button className="w-full min-h-touch" data-testid="button-get-started-mobile">
                         Get Started
                       </Button>
                     </Link>

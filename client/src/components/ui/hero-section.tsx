@@ -13,7 +13,7 @@ export default function HeroSection() {
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-chart-1/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+      <div className="relative container mx-auto text-center py-20">
         <div className="max-w-4xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-card border border-border mb-8 fade-in-custom">
@@ -22,27 +22,27 @@ export default function HeroSection() {
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold mb-6 slide-up">
+          <h1 className="text-hero-mobile md:text-hero-tablet lg:text-hero-desktop font-serif font-bold mb-6 leading-tight slide-up">
             <span className="gradient-text">Transform</span> Your Business with
-            <br />
+            <br className="hidden sm:block" />
             <span className="gradient-text">Cutting-Edge</span> Software Solutions
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed slide-up">
+          <p className="text-body-mobile md:text-body-tablet lg:text-body-desktop text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed slide-up">
             We're a global software development company that builds scalable, secure, and innovative solutions 
             for enterprises ready to dominate their markets.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 slide-up">
-            <Button size="lg" asChild className="text-lg px-8 py-4">
+          <div className="flex flex-col xs:flex-row gap-4 justify-center mb-12 slide-up">
+            <Button size="lg" asChild className="text-lg px-8 py-4 min-h-touch min-w-touch">
               <Link href="/contact">
                 <span>Start Your Project</span>
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="text-lg px-8 py-4">
+            <Button size="lg" variant="outline" asChild className="text-lg px-8 py-4 min-h-touch min-w-touch">
               <Link href="/portfolio">
                 <Play className="mr-2 h-5 w-5" />
                 <span>View Our Work</span>
@@ -51,22 +51,22 @@ export default function HeroSection() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto slide-up">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-2xl mx-auto slide-up">
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground mb-1">500+</div>
-              <div className="text-sm text-muted-foreground">Projects Delivered</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">500+</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Projects Delivered</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground mb-1">200+</div>
-              <div className="text-sm text-muted-foreground">Global Clients</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">200+</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Global Clients</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground mb-1">12+</div>
-              <div className="text-sm text-muted-foreground">Years Experience</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">12+</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Years Experience</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground mb-1">150+</div>
-              <div className="text-sm text-muted-foreground">Team Members</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">150+</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Team Members</div>
             </div>
           </div>
         </div>

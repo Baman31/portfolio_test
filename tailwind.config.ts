@@ -4,7 +4,33 @@ export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    // Container system (must be at theme level, not extend)
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '1rem',
+        'sm': '2rem',
+        'lg': '4rem',
+        'xl': '5rem',
+        '2xl': '6rem',
+      },
+    },
     extend: {
+      // Responsive breakpoints
+      screens: {
+        'xs': '475px',
+        'sm': '640px', 
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
+      // Responsive spacing
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -66,6 +92,39 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+      },
+      // Responsive typography
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+        'base': ['1rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '5xl': ['3rem', { lineHeight: '1' }],
+        '6xl': ['3.75rem', { lineHeight: '1' }],
+        '7xl': ['4.5rem', { lineHeight: '1' }],
+        '8xl': ['6rem', { lineHeight: '1' }],
+        '9xl': ['8rem', { lineHeight: '1' }],
+        // Fluid typography with clamp()
+        'hero-mobile': 'clamp(2.25rem, 8vw, 3rem)',
+        'hero-tablet': 'clamp(3rem, 10vw, 4.5rem)', 
+        'hero-desktop': 'clamp(4.5rem, 12vw, 7rem)',
+        'heading-mobile': 'clamp(1.5rem, 5vw, 2rem)',
+        'heading-tablet': 'clamp(2rem, 6vw, 3rem)',
+        'heading-desktop': 'clamp(3rem, 8vw, 5rem)',
+        'body-mobile': 'clamp(1rem, 4vw, 1.125rem)',
+        'body-tablet': 'clamp(1.125rem, 4vw, 1.25rem)',
+        'body-desktop': 'clamp(1.25rem, 4vw, 1.5rem)',
+      },
+      // Minimum touch target sizes
+      minHeight: {
+        'touch': '44px',
+      },
+      minWidth: {
+        'touch': '44px',
       },
       keyframes: {
         "accordion-down": {
@@ -158,5 +217,8 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"), 
+    require("@tailwindcss/typography"),
+  ],
 } satisfies Config;
